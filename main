@@ -24,12 +24,14 @@ local THEME = {
 _G.Destruction = false
 _G.AutoBuyHouse = false
 _G.AutoAudio = false
+_G.AutoKill = false
+_G.SpamItems = false
 _G.MenuVisible = true
 _G.SelectedAudio = "14145620056" -- Varsayılan ses
 
 -- GUI Oluşturma
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "XenoHub_V2"
+ScreenGui.Name = "XenoHub_V2_Ultimate"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -45,49 +47,49 @@ end
 -- Ana Panel
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 550, 0, 380)
-MainFrame.Position = UDim2.new(0.5, -275, 0.5, -190)
+MainFrame.Size = UDim2.new(0, 580, 0, 420)
+MainFrame.Position = UDim2.new(0.5, -290, 0.5, -210)
 MainFrame.BackgroundColor3 = THEME.Main
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
 MainFrame.Parent = ScreenGui
 
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.CornerRadius = UDim.new(0, 12)
 UICorner.Parent = MainFrame
 
 local UIStroke = Instance.new("UIStroke")
 UIStroke.Thickness = 2
 UIStroke.Color = THEME.Accent
-UIStroke.Transparency = 0.5
+UIStroke.Transparency = 0.4
 UIStroke.Parent = MainFrame
 
 -- Yan Menü (Sidebar)
 local Sidebar = Instance.new("Frame")
 Sidebar.Name = "Sidebar"
-Sidebar.Size = UDim2.new(0, 160, 1, 0)
+Sidebar.Size = UDim2.new(0, 170, 1, 0)
 Sidebar.BackgroundColor3 = THEME.Background
 Sidebar.BorderSizePixel = 0
 Sidebar.Parent = MainFrame
 
 local SideCorner = Instance.new("UICorner")
-SideCorner.CornerRadius = UDim.new(0, 10)
+SideCorner.CornerRadius = UDim.new(0, 12)
 SideCorner.Parent = Sidebar
 
 -- Başlık
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 50)
+Title.Size = UDim2.new(1, 0, 0, 60)
 Title.BackgroundTransparency = 1
 Title.Text = "XENOHUB V2"
 Title.TextColor3 = THEME.Accent
-Title.TextSize = 20
+Title.TextSize = 22
 Title.Font = Enum.Font.GothamBold
 Title.Parent = Sidebar
 
 -- Buton Konteynırı
 local ButtonList = Instance.new("ScrollingFrame")
-ButtonList.Size = UDim2.new(1, -10, 1, -100)
-ButtonList.Position = UDim2.new(0, 5, 0, 55)
+ButtonList.Size = UDim2.new(1, -10, 1, -110)
+ButtonList.Position = UDim2.new(0, 5, 0, 65)
 ButtonList.BackgroundTransparency = 1
 ButtonList.ScrollBarThickness = 0
 ButtonList.Parent = Sidebar
@@ -98,38 +100,38 @@ UIList.Parent = ButtonList
 
 -- Alt Bilgi (Keybind info)
 local KeyInfo = Instance.new("TextLabel")
-KeyInfo.Size = UDim2.new(1, 0, 0, 30)
-KeyInfo.Position = UDim2.new(0, 0, 1, -35)
+KeyInfo.Size = UDim2.new(1, 0, 0, 40)
+KeyInfo.Position = UDim2.new(0, 0, 1, -45)
 KeyInfo.BackgroundTransparency = 1
-KeyInfo.Text = "[R-SHIFT] Menü"
+KeyInfo.Text = "[R-SHIFT] Menüyü Aç/Kapat"
 KeyInfo.TextColor3 = THEME.SecondaryText
-KeyInfo.TextSize = 12
+KeyInfo.TextSize = 11
 KeyInfo.Font = Enum.Font.Gotham
 KeyInfo.Parent = Sidebar
 
 -- İçerik Alanı
 local Container = Instance.new("Frame")
 Container.Name = "Container"
-Container.Size = UDim2.new(1, -170, 1, -20)
-Container.Position = UDim2.new(0, 165, 0, 10)
+Container.Size = UDim2.new(1, -190, 1, -20)
+Container.Position = UDim2.new(0, 180, 0, 10)
 Container.BackgroundTransparency = 1
 Container.Parent = MainFrame
 
 -- Fonksiyonlar: Sayfa Oluşturma
 local function createTab(name)
     local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(1, 0, 0, 35)
+    TabButton.Size = UDim2.new(1, 0, 0, 40)
     TabButton.BackgroundColor3 = THEME.Main
     TabButton.BorderSizePixel = 0
-    TabButton.Text = "  " .. name
+    TabButton.Text = "   " .. name
     TabButton.TextColor3 = THEME.SecondaryText
-    TabButton.TextSize = 13
+    TabButton.TextSize = 14
     TabButton.Font = Enum.Font.GothamSemibold
     TabButton.TextXAlignment = Enum.TextXAlignment.Left
     TabButton.Parent = ButtonList
 
     local TabCorner = Instance.new("UICorner")
-    TabCorner.CornerRadius = UDim.new(0, 6)
+    TabCorner.CornerRadius = UDim.new(0, 8)
     TabCorner.Parent = TabButton
 
     local Page = Instance.new("ScrollingFrame")
@@ -137,12 +139,12 @@ local function createTab(name)
     Page.Size = UDim2.new(1, 0, 1, 0)
     Page.BackgroundTransparency = 1
     Page.Visible = false
-    Page.ScrollBarThickness = 2
+    Page.ScrollBarThickness = 3
     Page.ScrollBarImageColor3 = THEME.Accent
     Page.Parent = Container
 
     local PageList = Instance.new("UIListLayout")
-    PageList.Padding = UDim.new(0, 8)
+    PageList.Padding = UDim.new(0, 10)
     PageList.Parent = Page
 
     TabButton.MouseButton1Click:Connect(function()
@@ -164,39 +166,38 @@ end
 -- Fonksiyonlar: Toggle Oluşturma
 local function createToggle(parent, text, callback)
     local ToggleFrame = Instance.new("Frame")
-    ToggleFrame.Size = UDim2.new(1, -10, 0, 40)
+    ToggleFrame.Size = UDim2.new(1, -10, 0, 45)
     ToggleFrame.BackgroundColor3 = THEME.Background
     ToggleFrame.BorderSizePixel = 0
     ToggleFrame.Parent = parent
 
-    local Cor = Instance.new("UICorner")
-    Cor.CornerRadius = UDim.new(0, 6)
-    Cor.Parent = ToggleFrame
+    Instance.new("UICorner").CornerRadius = UDim.new(0, 8)
+    ToggleFrame.UICorner.Parent = ToggleFrame
 
     local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, -50, 1, 0)
-    Label.Position = UDim2.new(0, 10, 0, 0)
+    Label.Size = UDim2.new(1, -60, 1, 0)
+    Label.Position = UDim2.new(0, 15, 0, 0)
     Label.BackgroundTransparency = 1
     Label.Text = text
     Label.TextColor3 = THEME.Text
-    Label.TextSize = 13
+    Label.TextSize = 14
     Label.Font = Enum.Font.Gotham
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Parent = ToggleFrame
 
     local Box = Instance.new("Frame")
-    Box.Size = UDim2.new(0, 34, 0, 18)
-    Box.Position = UDim2.new(1, -44, 0.5, -9)
-    Box.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Box.Size = UDim2.new(0, 40, 0, 22)
+    Box.Position = UDim2.new(1, -55, 0.5, -11)
+    Box.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     Box.Parent = ToggleFrame
     local BoxCor = Instance.new("UICorner")
     BoxCor.CornerRadius = UDim.new(1, 0)
     BoxCor.Parent = Box
 
     local Indicator = Instance.new("Frame")
-    Indicator.Size = UDim2.new(0, 14, 0, 14)
-    Indicator.Position = UDim2.new(0, 2, 0.5, -7)
-    Indicator.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+    Indicator.Size = UDim2.new(0, 18, 0, 18)
+    Indicator.Position = UDim2.new(0, 2, 0.5, -9)
+    Indicator.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
     Indicator.Parent = Box
     local IndCor = Instance.new("UICorner")
     IndCor.CornerRadius = UDim.new(1, 0)
@@ -206,11 +207,11 @@ local function createToggle(parent, text, callback)
     ToggleFrame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             enabled = not enabled
-            local targetPos = enabled and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
-            local targetColor = enabled and THEME.Accent or Color3.fromRGB(50, 50, 50)
+            local targetPos = enabled and UDim2.new(1, -20, 0.5, -9) or UDim2.new(0, 2, 0.5, -9)
+            local targetColor = enabled and THEME.Accent or Color3.fromRGB(45, 45, 45)
             
-            TweenService:Create(Indicator, TweenInfo.new(0.2), {Position = targetPos}):Play()
-            TweenService:Create(Box, TweenInfo.new(0.2), {BackgroundColor3 = targetColor}):Play()
+            TweenService:Create(Indicator, TweenInfo.new(0.25), {Position = targetPos}):Play()
+            TweenService:Create(Box, TweenInfo.new(0.25), {BackgroundColor3 = targetColor}):Play()
             
             task.spawn(function() callback(enabled) end)
         end
@@ -220,32 +221,33 @@ end
 -- Fonksiyonlar: Buton Oluşturma
 local function createButton(parent, text, callback)
     local Btn = Instance.new("TextButton")
-    Btn.Size = UDim2.new(1, -10, 0, 35)
+    Btn.Size = UDim2.new(1, -10, 0, 40)
     Btn.BackgroundColor3 = THEME.Background
     Btn.Text = text
     Btn.TextColor3 = THEME.Text
     Btn.Font = Enum.Font.GothamSemibold
-    Btn.TextSize = 13
+    Btn.TextSize = 14
     Btn.Parent = parent
     
-    Instance.new("UICorner").Parent = Btn
+    Instance.new("UICorner").CornerRadius = UDim.new(0, 8)
+    Btn.UICorner.Parent = Btn
     
     Btn.MouseButton1Click:Connect(function()
+        local oldColor = Btn.BackgroundColor3
         Btn.BackgroundColor3 = THEME.Accent
         task.wait(0.1)
-        Btn.BackgroundColor3 = THEME.Background
+        Btn.BackgroundColor3 = oldColor
         task.spawn(callback)
     end)
 end
 
 -- Sayfalar
-local MainTab = createTab("Ana Menü")
-local ItemTab = createTab("Eşyalar")
-local AudioTab = createTab("Sesler")
+local MainTab = createTab("Genel Hileler")
+local ItemTab = createTab("Eşya Menüsü")
+local AudioTab = createTab("Ses & Müzik")
+local MiscTab = createTab("Ekstra")
 
--- ÖZELLİKLER (ORİJİNAL KOD ENTEGRASYONU)
-
--- 1. Yıkım Modu (Destruction)
+-- 1. GENEL HİLELER
 createToggle(MainTab, "Yıkım Modu (Destruction)", function(state)
     _G.Destruction = state
     while _G.Destruction do
@@ -272,53 +274,66 @@ createToggle(MainTab, "Yıkım Modu (Destruction)", function(state)
                 [12] = false,
             }))
         end)
-        task.wait(0.1)
+        task.wait(0.05)
     end
 end)
 
--- 2. Otomatik Ev Al
-createToggle(MainTab, "Otomatik Ev Al", function(state)
+createToggle(MainTab, "Otomatik Ev Satın Al", function(state)
     _G.AutoBuyHouse = state
     while _G.AutoBuyHouse do
         pcall(function()
-            GuinRemote:FireServer(table.unpack({
-                [1] = "BuyHouse",
-                [2] = "BuyHouse",
-                [3] = Vector3.new(0, -1, 0),
-                [4] = Vector3.new(0, 0, 0),
-                [5] = "BuyHouse",
-                [6] = "BuyHouse",
-                [7] = _G.SelectedAudio,
-                [8] = _G.SelectedAudio,
-                [9] = {[1] = true},
-                [10] = {
-                    [1] = 25,
-                    [2] = Vector3.new(0.25, 0.25, 100),
-                    [3] = BrickColor.new('Bright yellow'),
-                    [4] = 0.25,
-                    [5] = Enum.Material.SmoothPlastic,
-                    [6] = 0.25,
-                },
-                [11] = true,
-                [12] = false,
-            }))
+            local houseNames = {"House1", "House2", "House3", "House4", "House5"} -- Örnek ev listesi
+            for _, house in pairs(houseNames) do
+                GuinRemote:FireServer(table.unpack({
+                    [1] = house,
+                    [2] = house,
+                    [3] = Vector3.new(0, -1, 0),
+                    [4] = Vector3.new(0, 0, 0),
+                    [5] = house,
+                    [6] = house,
+                    [7] = _G.SelectedAudio,
+                    [8] = _G.SelectedAudio,
+                    [9] = {[1] = true},
+                    [10] = {[1] = 25, [2] = Vector3.new(0.25, 0.25, 100)},
+                    [11] = true,
+                    [12] = false,
+                }))
+            end
         end)
+        task.wait(0.2)
+    end
+end)
+
+-- 2. EŞYA MENÜSÜ (Genişletilmiş)
+local allItems = {
+    "Hammer", "Screwdriver", "Wrench", "Axe", "Saw", "Flashlight", 
+    "Sword", "Shield", "Gun", "Medkit", "Apple", "BloxyCola",
+    "CarSpawner", "Radio", "Bat", "Crowbar", "Knife"
+}
+
+createToggle(ItemTab, "Otomatik Eşya Spamla", function(state)
+    _G.SpamItems = state
+    while _G.SpamItems do
+        for _, itemName in pairs(allItems) do
+            if not _G.SpamItems then break end
+            pcall(function()
+                GuinRemote:FireServer(itemName, itemName, Vector3.new(0,0,0), Vector3.new(0,0,0), itemName)
+            end)
+        end
         task.wait(0.1)
     end
 end)
 
--- 3. Eşya Verme (Items)
-local items = {"Hammer", "Screwdriver", "Wrench", "Axe", "Saw"}
-for _, item in pairs(items) do
-    createButton(ItemTab, item .. " Al", function()
+for _, item in pairs(allItems) do
+    createButton(ItemTab, item .. " Envantere Ekle", function()
         pcall(function()
             GuinRemote:FireServer(item, item, Vector3.new(0,0,0), Vector3.new(0,0,0), item)
         end)
     end)
 end
 
--- 4. Ses Kontrolü
-createToggle(AudioTab, "Sürekli Ses Çal", function(state)
+-- 3. SES VE MÜZİK
+createToggle(AudioTab, "Sürekli Müzik Çal", function(state)
     _G.AutoAudio = state
     while _G.AutoAudio do
         pcall(function()
@@ -328,7 +343,33 @@ createToggle(AudioTab, "Sürekli Ses Çal", function(state)
     end
 end)
 
--- Sürüklenebilir Yapma
+createButton(AudioTab, "Sesi Durdur (Stop All)", function()
+    pcall(function()
+        GuinRemote:FireServer("AudioStop")
+    end)
+end)
+
+createButton(AudioTab, "XenoHub Marşı Çal", function()
+    _G.SelectedAudio = "14145620056"
+    pcall(function()
+        GuinRemote:FireServer("AudioPlay", _G.SelectedAudio)
+    end)
+end)
+
+-- 4. EKSTRA ÖZELLİKLER
+createButton(MiscTab, "Hızı Artır (WalkSpeed)", function()
+    player.Character.Humanoid.WalkSpeed = 100
+end)
+
+createButton(MiscTab, "Zıplama Artır (JumpPower)", function()
+    player.Character.Humanoid.JumpPower = 150
+end)
+
+createButton(MiscTab, "Karakteri Yenile (Reset)", function()
+    player.Character:BreakJoints()
+end)
+
+-- Sürüklenebilir Yapma Mantığı
 local dragging, dragInput, dragStart, startPos
 MainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -362,10 +403,21 @@ UserInputService.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.RightShift then
         _G.MenuVisible = not _G.MenuVisible
-        MainFrame.Visible = _G.MenuVisible
+        
+        if _G.MenuVisible then
+            MainFrame.Visible = true
+            TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(0, 580, 0, 420)}):Play()
+        else
+            local closeTween = TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Size = UDim2.new(0, 580, 0, 0)})
+            closeTween:Play()
+            closeTween.Completed:Connect(function()
+                if not _G.MenuVisible then MainFrame.Visible = false end
+            end)
+        end
     end
 end)
 
--- Açılış Animasyonu
-MainFrame.Size = UDim2.new(0, 0, 0, 0)
-TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Size = UDim2.new(0, 550, 0, 380)}):Play()
+-- Başlangıç
+MainFrame.Size = UDim2.new(0, 580, 0, 0)
+TweenService:Create(MainFrame, TweenInfo.new(0.6, Enum.EasingStyle.Back), {Size = UDim2.new(0, 580, 0, 420)}):Play()
+print("XenoHub V2 Ultimate Yüklendi! Kapatmak/Açmak için RightShift kullanın.")
