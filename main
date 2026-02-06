@@ -29,26 +29,29 @@ _G.SpamItems = false
 _G.MenuVisible = true
 _G.SelectedAudio = "14145620056" -- Varsayılan ses
 
--- GUI Oluşturma
+-- GUI Oluşturma (Tüm Executorlar İçin Uyumluluk)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "XenoHub_V2_Ultimate"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-if gethui then
-    ScreenGui.Parent = gethui()
-elseif syn and syn.protect_gui then
-    syn.protect_gui(ScreenGui)
-    ScreenGui.Parent = CoreGui
-else
-    ScreenGui.Parent = CoreGui
+local function ProtectGUI(gui)
+    if gethui then
+        gui.Parent = gethui()
+    elseif syn and syn.protect_gui then
+        syn.protect_gui(gui)
+        gui.Parent = CoreGui
+    else
+        gui.Parent = CoreGui
+    end
 end
+ProtectGUI(ScreenGui)
 
 -- Ana Panel
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 580, 0, 420)
-MainFrame.Position = UDim2.new(0.5, -290, 0.5, -210)
+MainFrame.Size = UDim2.new(0, 600, 0, 450)
+MainFrame.Position = UDim2.new(0.5, -300, 0.5, -225)
 MainFrame.BackgroundColor3 = THEME.Main
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
@@ -67,7 +70,7 @@ UIStroke.Parent = MainFrame
 -- Yan Menü (Sidebar)
 local Sidebar = Instance.new("Frame")
 Sidebar.Name = "Sidebar"
-Sidebar.Size = UDim2.new(0, 170, 1, 0)
+Sidebar.Size = UDim2.new(0, 180, 1, 0)
 Sidebar.BackgroundColor3 = THEME.Background
 Sidebar.BorderSizePixel = 0
 Sidebar.Parent = MainFrame
@@ -82,45 +85,45 @@ Title.Size = UDim2.new(1, 0, 0, 60)
 Title.BackgroundTransparency = 1
 Title.Text = "XENOHUB V2"
 Title.TextColor3 = THEME.Accent
-Title.TextSize = 22
+Title.TextSize = 24
 Title.Font = Enum.Font.GothamBold
 Title.Parent = Sidebar
 
 -- Buton Konteynırı
 local ButtonList = Instance.new("ScrollingFrame")
-ButtonList.Size = UDim2.new(1, -10, 1, -110)
-ButtonList.Position = UDim2.new(0, 5, 0, 65)
+ButtonList.Size = UDim2.new(1, -10, 1, -120)
+ButtonList.Position = UDim2.new(0, 5, 0, 70)
 ButtonList.BackgroundTransparency = 1
 ButtonList.ScrollBarThickness = 0
 ButtonList.Parent = Sidebar
 
 local UIList = Instance.new("UIListLayout")
-UIList.Padding = UDim.new(0, 5)
+UIList.Padding = UDim.new(0, 6)
 UIList.Parent = ButtonList
 
--- Alt Bilgi (Keybind info)
+-- Alt Bilgi
 local KeyInfo = Instance.new("TextLabel")
 KeyInfo.Size = UDim2.new(1, 0, 0, 40)
 KeyInfo.Position = UDim2.new(0, 0, 1, -45)
 KeyInfo.BackgroundTransparency = 1
-KeyInfo.Text = "[R-SHIFT] Menüyü Aç/Kapat"
+KeyInfo.Text = "[R-SHIFT] Menüyü Göster/Gizle"
 KeyInfo.TextColor3 = THEME.SecondaryText
-KeyInfo.TextSize = 11
+KeyInfo.TextSize = 12
 KeyInfo.Font = Enum.Font.Gotham
 KeyInfo.Parent = Sidebar
 
 -- İçerik Alanı
 local Container = Instance.new("Frame")
 Container.Name = "Container"
-Container.Size = UDim2.new(1, -190, 1, -20)
-Container.Position = UDim2.new(0, 180, 0, 10)
+Container.Size = UDim2.new(1, -200, 1, -20)
+Container.Position = UDim2.new(0, 190, 0, 10)
 Container.BackgroundTransparency = 1
 Container.Parent = MainFrame
 
 -- Fonksiyonlar: Sayfa Oluşturma
 local function createTab(name)
     local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(1, 0, 0, 40)
+    TabButton.Size = UDim2.new(1, 0, 0, 42)
     TabButton.BackgroundColor3 = THEME.Main
     TabButton.BorderSizePixel = 0
     TabButton.Text = "   " .. name
@@ -166,7 +169,7 @@ end
 -- Fonksiyonlar: Toggle Oluşturma
 local function createToggle(parent, text, callback)
     local ToggleFrame = Instance.new("Frame")
-    ToggleFrame.Size = UDim2.new(1, -10, 0, 45)
+    ToggleFrame.Size = UDim2.new(1, -10, 0, 48)
     ToggleFrame.BackgroundColor3 = THEME.Background
     ToggleFrame.BorderSizePixel = 0
     ToggleFrame.Parent = parent
@@ -175,7 +178,7 @@ local function createToggle(parent, text, callback)
     ToggleFrame.UICorner.Parent = ToggleFrame
 
     local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, -60, 1, 0)
+    Label.Size = UDim2.new(1, -65, 1, 0)
     Label.Position = UDim2.new(0, 15, 0, 0)
     Label.BackgroundTransparency = 1
     Label.Text = text
@@ -186,8 +189,8 @@ local function createToggle(parent, text, callback)
     Label.Parent = ToggleFrame
 
     local Box = Instance.new("Frame")
-    Box.Size = UDim2.new(0, 40, 0, 22)
-    Box.Position = UDim2.new(1, -55, 0.5, -11)
+    Box.Size = UDim2.new(0, 42, 0, 24)
+    Box.Position = UDim2.new(1, -55, 0.5, -12)
     Box.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     Box.Parent = ToggleFrame
     local BoxCor = Instance.new("UICorner")
@@ -195,8 +198,8 @@ local function createToggle(parent, text, callback)
     BoxCor.Parent = Box
 
     local Indicator = Instance.new("Frame")
-    Indicator.Size = UDim2.new(0, 18, 0, 18)
-    Indicator.Position = UDim2.new(0, 2, 0.5, -9)
+    Indicator.Size = UDim2.new(0, 20, 0, 20)
+    Indicator.Position = UDim2.new(0, 2, 0.5, -10)
     Indicator.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
     Indicator.Parent = Box
     local IndCor = Instance.new("UICorner")
@@ -207,7 +210,7 @@ local function createToggle(parent, text, callback)
     ToggleFrame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             enabled = not enabled
-            local targetPos = enabled and UDim2.new(1, -20, 0.5, -9) or UDim2.new(0, 2, 0.5, -9)
+            local targetPos = enabled and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
             local targetColor = enabled and THEME.Accent or Color3.fromRGB(45, 45, 45)
             
             TweenService:Create(Indicator, TweenInfo.new(0.25), {Position = targetPos}):Play()
@@ -221,7 +224,7 @@ end
 -- Fonksiyonlar: Buton Oluşturma
 local function createButton(parent, text, callback)
     local Btn = Instance.new("TextButton")
-    Btn.Size = UDim2.new(1, -10, 0, 40)
+    Btn.Size = UDim2.new(1, -10, 0, 42)
     Btn.BackgroundColor3 = THEME.Background
     Btn.Text = text
     Btn.TextColor3 = THEME.Text
@@ -242,98 +245,77 @@ local function createButton(parent, text, callback)
 end
 
 -- Sayfalar
-local MainTab = createTab("Genel Hileler")
-local ItemTab = createTab("Eşya Menüsü")
-local AudioTab = createTab("Ses & Müzik")
-local MiscTab = createTab("Ekstra")
+local MainTab = createTab("Ana Özellikler")
+local ItemTab = createTab("Tüm Eşyalar")
+local AudioTab = createTab("Ses Kontrol")
+local VisualTab = createTab("Görsel & Oyuncu")
 
--- 1. GENEL HİLELER
-createToggle(MainTab, "Yıkım Modu (Destruction)", function(state)
+-- 1. ANA ÖZELLİKLER
+createToggle(MainTab, "Yıkım Modu (Destruction Loop)", function(state)
     _G.Destruction = state
     while _G.Destruction do
         pcall(function()
             GuinRemote:FireServer(table.unpack({
-                [1] = "Destruction",
-                [2] = "Destruction",
-                [3] = Vector3.new(0, -1, 0),
-                [4] = Vector3.new(0, 0, 0),
-                [5] = "Destruction",
-                [6] = "Destruction",
-                [7] = "Destruction",
-                [8] = "Destruction",
+                [1] = "Destruction", [2] = "Destruction", [3] = Vector3.new(0, -1, 0), [4] = Vector3.new(0, 0, 0),
+                [5] = "Destruction", [6] = "Destruction", [7] = "Destruction", [8] = "Destruction",
                 [9] = {[1] = true},
-                [10] = {
-                    [1] = 25,
-                    [2] = Vector3.new(0.25, 0.25, 100),
-                    [3] = BrickColor.new('Bright yellow'),
-                    [4] = 0.25,
-                    [5] = Enum.Material.SmoothPlastic,
-                    [6] = 0.25,
-                },
-                [11] = true,
-                [12] = false,
+                [10] = {[1] = 25, [2] = Vector3.new(0.25, 0.25, 100), [3] = BrickColor.new('Bright yellow'), [4] = 0.25, [5] = Enum.Material.SmoothPlastic, [6] = 0.25},
+                [11] = true, [12] = false
             }))
         end)
         task.wait(0.05)
     end
 end)
 
-createToggle(MainTab, "Otomatik Ev Satın Al", function(state)
+createToggle(MainTab, "Tüm Evleri Otomatik Al", function(state)
     _G.AutoBuyHouse = state
     while _G.AutoBuyHouse do
         pcall(function()
-            local houseNames = {"House1", "House2", "House3", "House4", "House5"} -- Örnek ev listesi
-            for _, house in pairs(houseNames) do
+            for i = 1, 30 do
+                local houseName = "House" .. tostring(i)
                 GuinRemote:FireServer(table.unpack({
-                    [1] = house,
-                    [2] = house,
-                    [3] = Vector3.new(0, -1, 0),
-                    [4] = Vector3.new(0, 0, 0),
-                    [5] = house,
-                    [6] = house,
-                    [7] = _G.SelectedAudio,
-                    [8] = _G.SelectedAudio,
-                    [9] = {[1] = true},
-                    [10] = {[1] = 25, [2] = Vector3.new(0.25, 0.25, 100)},
-                    [11] = true,
-                    [12] = false,
+                    [1] = houseName, [2] = houseName, [3] = Vector3.new(0, -1, 0), [4] = Vector3.new(0, 0, 0),
+                    [5] = houseName, [6] = houseName, [7] = _G.SelectedAudio, [8] = _G.SelectedAudio,
+                    [9] = {[1] = true}, [10] = {[1] = 25, [2] = Vector3.new(0.25, 0.25, 100)}, [11] = true, [12] = false
                 }))
             end
         end)
-        task.wait(0.2)
+        task.wait(0.5)
     end
 end)
 
--- 2. EŞYA MENÜSÜ (Genişletilmiş)
-local allItems = {
-    "Hammer", "Screwdriver", "Wrench", "Axe", "Saw", "Flashlight", 
-    "Sword", "Shield", "Gun", "Medkit", "Apple", "BloxyCola",
-    "CarSpawner", "Radio", "Bat", "Crowbar", "Knife"
+-- 2. TÜM EŞYALAR (FULL LİSTE)
+local fullItems = {
+    "Hammer", "Screwdriver", "Wrench", "Axe", "Saw", "Flashlight", "Pickaxe",
+    "Sword", "Shield", "Gun", "Rifle", "Shotgun", "Sniper", "Medkit",
+    "Apple", "BloxyCola", "Pizza", "Donut", "Taco",
+    "CarSpawner", "Radio", "Bat", "Crowbar", "Knife", "Grenade", "C4"
 }
 
-createToggle(ItemTab, "Otomatik Eşya Spamla", function(state)
+createToggle(ItemTab, "Otomatik Eşya Doldur (Spam)", function(state)
     _G.SpamItems = state
     while _G.SpamItems do
-        for _, itemName in pairs(allItems) do
+        for _, item in pairs(fullItems) do
             if not _G.SpamItems then break end
             pcall(function()
-                GuinRemote:FireServer(itemName, itemName, Vector3.new(0,0,0), Vector3.new(0,0,0), itemName)
+                GuinRemote:FireServer(item, item, Vector3.new(0,0,0), Vector3.new(0,0,0), item)
             end)
+            task.wait(0.02)
         end
         task.wait(0.1)
     end
 end)
 
-for _, item in pairs(allItems) do
-    createButton(ItemTab, item .. " Envantere Ekle", function()
+for _, item in pairs(fullItems) do
+    createButton(ItemTab, item .. " Al", function()
         pcall(function()
             GuinRemote:FireServer(item, item, Vector3.new(0,0,0), Vector3.new(0,0,0), item)
         end)
     end)
 end
 
--- 3. SES VE MÜZİK
-createToggle(AudioTab, "Sürekli Müzik Çal", function(state)
+-- 3. SES KONTROL
+createToggle(AudioTab, "Sürekli Audio Loop", function(state)
     _G.AutoAudio = state
     while _G.AutoAudio do
         pcall(function()
@@ -343,33 +325,36 @@ createToggle(AudioTab, "Sürekli Müzik Çal", function(state)
     end
 end)
 
-createButton(AudioTab, "Sesi Durdur (Stop All)", function()
-    pcall(function()
-        GuinRemote:FireServer("AudioStop")
-    end)
+createButton(AudioTab, "Müziği Durdur", function()
+    pcall(function() GuinRemote:FireServer("AudioStop") end)
 end)
 
-createButton(AudioTab, "XenoHub Marşı Çal", function()
+createButton(AudioTab, "XenoHub Sound Test", function()
     _G.SelectedAudio = "14145620056"
-    pcall(function()
-        GuinRemote:FireServer("AudioPlay", _G.SelectedAudio)
-    end)
+    pcall(function() GuinRemote:FireServer("AudioPlay", _G.SelectedAudio) end)
 end)
 
--- 4. EKSTRA ÖZELLİKLER
-createButton(MiscTab, "Hızı Artır (WalkSpeed)", function()
+-- 4. GÖRSEL & OYUNCU
+createButton(VisualTab, "Süper Hız (WalkSpeed 100)", function()
     player.Character.Humanoid.WalkSpeed = 100
 end)
 
-createButton(MiscTab, "Zıplama Artır (JumpPower)", function()
+createButton(VisualTab, "Süper Zıplama (JumpPower 150)", function()
     player.Character.Humanoid.JumpPower = 150
 end)
 
-createButton(MiscTab, "Karakteri Yenile (Reset)", function()
+createButton(VisualTab, "Karakter Resetle", function()
     player.Character:BreakJoints()
 end)
 
--- Sürüklenebilir Yapma Mantığı
+createButton(VisualTab, "Karanlık Görüş (FullBright)", function()
+    game:GetService("Lighting").Brightness = 2
+    game:GetService("Lighting").ClockTime = 14
+    game:GetService("Lighting").FogEnd = 100000
+    game:GetService("Lighting").GlobalShadows = false
+end)
+
+-- Sürükleme Mantığı
 local dragging, dragInput, dragStart, startPos
 MainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -398,7 +383,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- Menü Açma Kapama (RightShift)
+-- Menü Kısayolu (RightShift)
 UserInputService.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.RightShift then
@@ -406,9 +391,9 @@ UserInputService.InputBegan:Connect(function(input, gpe)
         
         if _G.MenuVisible then
             MainFrame.Visible = true
-            TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(0, 580, 0, 420)}):Play()
+            TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(0, 600, 0, 450)}):Play()
         else
-            local closeTween = TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Size = UDim2.new(0, 580, 0, 0)})
+            local closeTween = TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Size = UDim2.new(0, 600, 0, 0)})
             closeTween:Play()
             closeTween.Completed:Connect(function()
                 if not _G.MenuVisible then MainFrame.Visible = false end
@@ -418,6 +403,6 @@ UserInputService.InputBegan:Connect(function(input, gpe)
 end)
 
 -- Başlangıç
-MainFrame.Size = UDim2.new(0, 580, 0, 0)
-TweenService:Create(MainFrame, TweenInfo.new(0.6, Enum.EasingStyle.Back), {Size = UDim2.new(0, 580, 0, 420)}):Play()
-print("XenoHub V2 Ultimate Yüklendi! Kapatmak/Açmak için RightShift kullanın.")
+MainFrame.Size = UDim2.new(0, 600, 0, 0)
+TweenService:Create(MainFrame, TweenInfo.new(0.7, Enum.EasingStyle.Back), {Size = UDim2.new(0, 600, 0, 450)}):Play()
+print("XenoHub V2 Ultimate Yüklendi! RightShift ile menüyü yönetebilirsiniz.")
